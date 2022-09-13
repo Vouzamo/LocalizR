@@ -1,8 +1,10 @@
+using LocalizR.Common.Accessors;
 using LocalizR.Common.Models;
 using LocalizR.Common.Services;
 using LocalizR.Common.Tests.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 
@@ -11,79 +13,68 @@ namespace LocalizR.Common.Tests
     [TestClass]
     public class UnitTests
     {
-        private static readonly Example Example = new()
-        {
-            Title = new Localizable<string>()
-            {
-                { "en", "Hello world!" },
-                { "fr", "Bonjour le monde!" },
-                { "de", "Hallo welt!" }
-            },
-            Tags = new Localizable<IEnumerable<string>>()
-            {
-                { "en", new List<string> { "new", "featured" } },
-                { "de", new List<string> { "featured" } }
-            },
-            DisplayAuthor = new Localizable<bool>()
-            {
-                { "en", false },
-                { "fr", true }
-            }
-        };
-
-        [TestMethod]
-        public void CurrentCultureTests()
-        {
-            ILocalizationService service = new CurrentCultureLocalizationService();
-
-            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en");
-
-            Assert.AreEqual("Hello world!", service.Localize(Example.Title));
-            Assert.AreEqual(2, service.Localize(Example.Tags)?.Count());
-            Assert.IsFalse(service.Localize(Example.DisplayAuthor));
-
-            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("fr");
-
-            Assert.AreEqual("Bonjour le monde!", service.Localize(Example.Title));
-            Assert.IsNull(service.Localize(Example.Tags));
-            Assert.IsTrue(service.Localize(Example.DisplayAuthor));
-
-            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("de");
-
-            Assert.AreEqual("Hallo welt!", service.Localize(Example.Title));
-            Assert.AreEqual(1, service.Localize(Example.Tags)?.Count());
-            Assert.IsFalse(service.Localize(Example.DisplayAuthor));
-        }
-
         [TestMethod]
         public void HierarchyTests()
         {
-            var localizationHierarchy = new Hierarchy<string>("en")
+            var example = new Example
             {
-                new Hierarchy<string>("fr")
+                Title = new Localizable<string>()
                 {
-                    new Hierarchy<string>("fr-FR")
+                    { "en", "Hello world!" },
+                    { "fr", "Bonjour le monde!" },
+                    { "de", "Hallo welt!" }
                 },
-                new Hierarchy<string>("es")
+                    Tags = new Localizable<IEnumerable<string>>()
                 {
-                    new Hierarchy<string>("es-ES")
+                    { "en", new List<string> { "new", "featured" } },
+                    { "de", new List<string> { "featured" } }
                 },
-                new Hierarchy<string>("de")
+                    DisplayAuthor = new Localizable<bool>()
                 {
-                    new Hierarchy<string>("de-DE")
-                },
-                new Hierarchy<string>("en-GB"),
-                new Hierarchy<string>("en-US")
+                    { "en", false },
+                    { "fr", true }
+                }
             };
 
-            if(localizationHierarchy.TryFindDependencyChain(l => l.Equals("fr-FR"), out var chain))
+            ILocalizationHierarchyAccessor<CultureInfo> localizationHierarchyAccessor = new SimpleLocalizationHierarchyAccessor<CultureInfo>(new Hierarchy<CultureInfo>(new CultureInfo("en"))
             {
-                ILocalizationService service = new ChainLocalizationService(chain);
+                new Hierarchy<CultureInfo>(new CultureInfo("fr"))
+                {
+                    new Hierarchy<CultureInfo>(new CultureInfo("fr-FR"))
+                },
+                new Hierarchy<CultureInfo>(new CultureInfo("es"))
+                {
+                    new Hierarchy<CultureInfo>(new CultureInfo("es-ES"))
+                },
+                new Hierarchy<CultureInfo>(new CultureInfo("de"))
+                {
+                    new Hierarchy<CultureInfo>(new CultureInfo("de-DE"))
+                },
+                new Hierarchy<CultureInfo>(new CultureInfo("en-GB")),
+                new Hierarchy<CultureInfo>(new CultureInfo("en-US"))
+            });
 
-                Assert.AreEqual("Bonjour le monde!", service.Localize(Example.Title));
-                Assert.AreEqual(2, service.Localize(Example.Tags)?.Count());
-                Assert.IsTrue(service.Localize(Example.DisplayAuthor));
-            }
+            ILocalizationAccessor<CultureInfo> localizationAccessor = new CurrentThreadLocalizationAccessor();
+
+            ILocalizationService service = new CultureInfoLocalizationService(localizationHierarchyAccessor, localizationAccessor);
+
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("en");
+
+            Assert.AreEqual("Hello world!", service.Localize(example.Title));
+            Assert.AreEqual(2, service.Localize(example.Tags)?.Count());
+            Assert.IsFalse(service.Localize(example.DisplayAuthor));
+
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("fr");
+
+            Assert.AreEqual("Bonjour le monde!", service.Localize(example.Title));
+            Assert.AreEqual(2, service.Localize(example.Tags)?.Count());
+            Assert.IsTrue(service.Localize(example.DisplayAuthor));
+
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("de");
+
+            Assert.AreEqual("Hallo welt!", service.Localize(example.Title));
+            Assert.AreEqual(1, service.Localize(example.Tags)?.Count());
+            Assert.IsFalse(service.Localize(example.DisplayAuthor));
         }
     }
 }
