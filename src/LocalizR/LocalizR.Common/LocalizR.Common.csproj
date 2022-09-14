@@ -4,6 +4,12 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<PackageId>Vouzamo.LocalizR</PackageId>
+	<Version>0.0.1</Version>
+	<Authors>John Askew</Authors>
+	<Company>Vouzamo</Company>
+	<PackageDescription>LocalizR is a package to assist with handling localizable types in .NET and localizing against them.</PackageDescription>
+	<RepositoryUrl>https://github.com/Vouzamo/localizR</RepositoryUrl>
   </PropertyGroup>
 
 </Project>
