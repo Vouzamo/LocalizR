@@ -36,4 +36,4 @@ jobs:
       run: dotnet pack $SOLUTION --configuration $BUILD_CONFIG
     - name: Publish
       if: github.ref == 'refs/heads/master'
-      run: dotnet nuget push "**/LocalizR.Common.*.nupkg" --source "github" --skip-duplicate
+      run: dotnet nuget push "**/Vouzamo.LocalizR.Common.*.nupkg" --source "github" --skip-duplicate
