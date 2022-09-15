@@ -36,7 +36,7 @@ namespace LocalizR.Common.Tests
                 }
             };
 
-            ILocalizationHierarchyAccessor<CultureInfo> localizationHierarchyAccessor = new SimpleLocalizationHierarchyAccessor<CultureInfo>(new Hierarchy<CultureInfo>(new CultureInfo("en"))
+            ILocalizationHierarchyAccessor<CultureInfo> localizationHierarchyAccessor = new DefaultLocalizationHierarchyAccessor<CultureInfo>(new Hierarchy<CultureInfo>(new CultureInfo("en"))
             {
                 new Hierarchy<CultureInfo>(new CultureInfo("fr"))
                 {

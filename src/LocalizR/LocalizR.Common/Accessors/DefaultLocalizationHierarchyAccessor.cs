@@ -3,11 +3,11 @@ using System.Globalization;
 
 namespace LocalizR.Common.Accessors
 {
-    public class SimpleLocalizationHierarchyAccessor<T> : ILocalizationHierarchyAccessor<T>
+    public class DefaultLocalizationHierarchyAccessor<T> : ILocalizationHierarchyAccessor<T>
     {
         private Hierarchy<T> Hierarchy { get; }
 
-        public SimpleLocalizationHierarchyAccessor(Hierarchy<T> hierarchy)
+        public DefaultLocalizationHierarchyAccessor(Hierarchy<T> hierarchy)
         {
             Hierarchy = hierarchy;
         }
